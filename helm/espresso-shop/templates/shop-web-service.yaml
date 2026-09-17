@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: espresso-shop-web-svc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-web
+spec:
+  type: {{ .Values.shopWeb.service.type }}
+  selector:
+    app: espresso-shop-web
+  ports:
+    - name: http
+      port: {{ .Values.shopWeb.service.port }}
+      targetPort: {{ .Values.shopWeb.containerPort }}
+      protocol: TCP
+      {{- if and (eq .Values.shopWeb.service.type "NodePort") .Values.shopWeb.service.nodePort }}
+      nodePort: {{ .Values.shopWeb.service.nodePort }}
+      {{- end }}
+

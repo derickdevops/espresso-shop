@@ -1,0 +1,20 @@
+{{- if .Values.postgresReplication.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: espresso-shop-postgres-replication-svc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-postgres-replication
+spec:
+  type: ClusterIP
+  selector:
+    app: espresso-shop-postgres-replication
+  ports:
+    - name: postgres
+      port: {{ .Values.postgres.service.port }}
+      targetPort: {{ .Values.postgres.containerPort }}
+      protocol: TCP
+{{- end }}
+

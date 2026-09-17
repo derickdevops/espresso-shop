@@ -1,0 +1,7 @@
+apiVersion: v2
+name: espresso-shop
+description: Helm chart for the S3 Espresso Shop microservice application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: espresso-shop-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-web
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.shopWeb.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: espresso-shop-web
+  template:
+    metadata:
+      labels:
+        app: espresso-shop-web
+      {{- with .Values.shopWeb.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "espresso-shop.serviceAccountName" . }}
+      {{- with .Values.shopWeb.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: shop-web
+          {{- with .Values.shopWeb.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.shopWeb.image.repository }}:{{ .Values.shopWeb.image.tag }}"
+          imagePullPolicy: {{ .Values.shopWeb.image.pullPolicy }}
+          {{- with .Values.shopWeb.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.shopWeb.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.shopWeb.containerPort }}
+              protocol: TCP
+          env:
+            - name: ProductCatalogUrl
+              value: {{ .Values.shopWeb.env.ProductCatalogUrl | quote }}
+            - name: ReviewsUrl
+              value: {{ .Values.shopWeb.env.ReviewsUrl | quote }}
+          {{- with .Values.shopWeb.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.shopWeb.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.shopWeb.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.shopWeb.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

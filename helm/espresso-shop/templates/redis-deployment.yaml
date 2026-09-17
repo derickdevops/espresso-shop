@@ -1,0 +1,34 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: espresso-shop-redis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-redis
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      app: espresso-shop-redis
+  template:
+    metadata:
+      labels:
+        app: espresso-shop-redis
+    spec:
+      serviceAccountName: {{ include "espresso-shop.serviceAccountName" . }}
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redis.containerPort }}
+              protocol: TCP
+          {{- with .Values.redis.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
+

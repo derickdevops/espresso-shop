@@ -1,0 +1,37 @@
+{{- if .Values.postgresReplication.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: espresso-shop-postgres-replication
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-postgres-replication
+spec:
+  replicas: {{ .Values.postgresReplication.replicaCount }}
+  selector:
+    matchLabels:
+      app: espresso-shop-postgres-replication
+  template:
+    metadata:
+      labels:
+        app: espresso-shop-postgres-replication
+    spec:
+      serviceAccountName: {{ include "espresso-shop.serviceAccountName" . }}
+      containers:
+        - name: postgres-replication
+          image: "{{ .Values.postgresReplication.image.repository }}:{{ .Values.postgresReplication.image.tag }}"
+          imagePullPolicy: {{ .Values.postgresReplication.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: espresso-shop-postgres-secret
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.postgres.containerPort }}
+              protocol: TCP
+          {{- with .Values.postgresReplication.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
+
