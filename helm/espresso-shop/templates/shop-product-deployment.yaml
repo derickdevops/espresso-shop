@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: espresso-shop-product-catalog
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-product-catalog
+    version: {{ .Values.shopProduct.version }}
+spec:
+  replicas: {{ .Values.shopProduct.replicaCount }}
+  selector:
+    matchLabels:
+      app: espresso-shop-product-catalog
+  template:
+    metadata:
+      labels:
+        app: espresso-shop-product-catalog
+        version: {{ .Values.shopProduct.version }}
+    spec:
+      serviceAccountName: {{ include "espresso-shop.serviceAccountName" . }}
+      containers:
+        - name: shop-product
+          image: "{{ .Values.shopProduct.image.repository }}:{{ .Values.shopProduct.image.tag }}"
+          imagePullPolicy: {{ .Values.shopProduct.image.pullPolicy }}
+          {{- with .Values.shopProduct.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.shopProduct.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.shopProduct.containerPort }}
+              protocol: TCP
+          {{- with .Values.shopProduct.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+

@@ -1,0 +1,14 @@
+Espresso Shop has been deployed.
+
+Namespace:
+  {{ .Release.Namespace }}
+
+Check resources:
+  kubectl get all -n {{ .Release.Namespace }}
+
+Open the app with port-forward:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/espresso-shop-web-svc 8090:8090 --address 0.0.0.0
+
+Then open:
+  http://EC2_PUBLIC_IP:8090
+

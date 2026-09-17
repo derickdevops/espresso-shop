@@ -1,0 +1,48 @@
+{{- if .Values.shopReviews.v2.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: espresso-shop-reviews-v2
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "espresso-shop.labels" . | nindent 4 }}
+    app: espresso-shop-reviews
+    version: {{ .Values.shopReviews.v2.version }}
+spec:
+  replicas: {{ .Values.shopReviews.replicaCount }}
+  selector:
+    matchLabels:
+      app: espresso-shop-reviews
+      version: {{ .Values.shopReviews.v2.version }}
+  template:
+    metadata:
+      labels:
+        app: espresso-shop-reviews
+        version: {{ .Values.shopReviews.v2.version }}
+    spec:
+      serviceAccountName: {{ include "espresso-shop.serviceAccountName" . }}
+      containers:
+        - name: shop-reviews
+          image: "{{ .Values.shopReviews.image.repository }}:{{ .Values.shopReviews.image.tag }}"
+          imagePullPolicy: {{ .Values.shopReviews.image.pullPolicy }}
+          {{- with .Values.shopReviews.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.shopReviews.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.shopReviews.containerPort }}
+              protocol: TCP
+          env:
+            - name: SERVICE_VERSION
+              value: {{ .Values.shopReviews.v2.serviceVersion | quote }}
+          {{- with .Values.shopReviews.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
+

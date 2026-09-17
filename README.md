@@ -1,13 +1,14 @@
-# Espresso Shop UI Image
+# Espresso Shop
 
-This repository contains only the custom frontend image used for the Espresso Shop Kubernetes lab.
+This repository contains the custom frontend image and Helm chart used for the Espresso Shop Kubernetes lab.
 
 It includes:
 
 - `app.py`: a small Python web UI for Espresso Shop
 - `Dockerfile`: builds the web image
+- `helm/espresso-shop`: Helm chart for deploying the Espresso Shop stack
 
-The product, review, Redis, Postgres, Helm chart, and Kubernetes manifests are not included here.
+The product and review images are expected to already exist in your container runtime or registry.
 
 ## Build Locally
 
@@ -37,4 +38,18 @@ The UI reads these service URLs:
 ```bash
 ProductCatalogUrl=http://espresso-shop-product-catalog-svc:8091
 ReviewsUrl=http://espresso-shop-reviews-svc:8092
+```
+
+## Deploy With Helm
+
+```bash
+kubectl create namespace espresso-shop
+helm install espresso-shop ./helm/espresso-shop -n espresso-shop
+kubectl get pods -n espresso-shop -w
+```
+
+## Upgrade With Helm
+
+```bash
+helm upgrade espresso-shop ./helm/espresso-shop -n espresso-shop
 ```
